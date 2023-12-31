@@ -1,0 +1,39 @@
+const GameModel = require('../../models/gameModel');
+const { ObjectId } = require("mongoose")
+const gameRequestModel = require('../../models/gameRequestModel');
+class GameController {
+    /**
+     * Game List
+     */
+    async gameList(req, res) {
+        let list = await GameModel.find({ userId: req.user._id });
+        return res.json({
+            status: true,
+            message: "Your game request successfully created.",
+            data: game
+        })
+    }
+    /**
+     * Game Request 
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
+    async gamePlay(req, res) {
+        let { gameNumber, type } = req.body;
+        console.log({ gameNumber });
+        let game = await gameRequestModel.create({
+            gameDate: new Date(),
+            userId: (req.user._id),
+            gameNumber,
+            type,
+            status: "active"
+        });
+        return res.json({
+            message: "Your game request successfully created.",
+            status: true,
+            data: game
+        })
+    }
+}
+module.exports = new GameController();
