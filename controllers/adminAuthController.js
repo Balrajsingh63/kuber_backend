@@ -6,8 +6,8 @@ const saltRounds = 10;
 
 class AdminAuthController {
     async login(req, res) {
-        let { phone, password } = req.body;
-        let user = await userModel.findOne({ mobile: phone, role: "Admin" }).lean();
+        let { email, password } = req.body;
+        let user = await userModel.findOne({ email: email, role: "Admin" }).lean();
         if (!user) {
             return res.status(200).json({
                 status: false,
