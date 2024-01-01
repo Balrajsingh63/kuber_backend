@@ -25,6 +25,7 @@ class AuthController {
         }
         let token = jwt.sign(user, process.env.privateKey);
         user.token = token;
+        user.wallet = 0;
         return res.status(200).json({
             status: true,
             message: msg.login_success,

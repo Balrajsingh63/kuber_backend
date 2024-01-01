@@ -5,4 +5,5 @@ const { getToken } = require("../../middleware/authenticationMiddleware");
 
 router.get('/game-request-list', getToken, gameController.gameList);
 router.post('/game-request', getToken, gameController.gamePlay);
+router.get('/game-list', getToken, gameController.gameList);
 module.exports = router;

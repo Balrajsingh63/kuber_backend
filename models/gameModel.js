@@ -1,9 +1,17 @@
 const mongoose = require("mongoose");
 
 const gameModel = new mongoose.Schema({
-
+    gameName: {
+        type: String
+    },
     gameNumber: {
         type: Number
+    },
+    gameStartTime: {
+        type: String
+    },
+    gameEndTime: {
+        type: String
     },
     gameDate: {
         type: Date

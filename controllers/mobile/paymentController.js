@@ -91,5 +91,15 @@ class PaymentController {
             data: transactions
         });
     }
+
+    // async walletTransaction(req, res) {
+    //     const { amount,type,} = req.body;
+    //     const transaction = await TransactionModel.create({
+
+    //     });
+    // }
+
+
+
 }
 module.exports = new PaymentController();

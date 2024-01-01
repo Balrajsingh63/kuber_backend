@@ -6,7 +6,7 @@ class GameController {
      * Game List
      */
     async gameList(req, res) {
-        let list = await GameModel.find({ userId: req.user._id });
+        let list = await GameModel.find({});
         return res.json({
             status: true,
             message: "Your game request successfully created.",
