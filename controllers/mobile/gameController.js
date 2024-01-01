@@ -10,7 +10,7 @@ class GameController {
         return res.json({
             status: true,
             message: "Your game request successfully created.",
-            data: game
+            data: list
         })
     }
     /**
