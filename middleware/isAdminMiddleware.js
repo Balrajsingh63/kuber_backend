@@ -1,9 +1,11 @@
 class IsAdminMiddlware {
     isAdmin(req, res, next) {
-        if (req.user.role == "admin") {
+        if (req.user.role == "Admin") {
             next();
         } else {
-            res.status(403).send();
+            res.status(403).json({
+                message: "You are not authorized"
+            });
         }
     }
 }

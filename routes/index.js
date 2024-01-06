@@ -1,10 +1,15 @@
 var express = require('express');
 var router = express.Router();
-const AuthRouter = require("./authRoute");
+const AuthRouter = require("./adminAuthRoute");
+const usersRouter = require("./users");
+const gameRouter = require("./game");
 
 
 
-router.use("/auth", AuthRouter);
+
+router.use("/", AuthRouter);
+router.use("/user", usersRouter)
+router.use("/game", gameRouter);
 
 /* GET home page. */
 // router.get('/', function(req, res, next) {

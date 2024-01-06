@@ -2,9 +2,10 @@ const userModel = require("../models/userModel");
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 class UserController {
-    async index() {
-        const user = await User.find({ $ne: { role: "Admin" } });
-        return res.json({
+    async index(req, res) {
+        console.log("sdsd");
+        const users = await userModel.find({ role: { $ne: "Admin" } });
+        return res.status(200).json({
             data: users,
             message: "User list"
         })

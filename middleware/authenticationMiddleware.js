@@ -9,11 +9,9 @@ class AuthenticationMiddlware {
             const token = authorization.replace('Bearer ', "");
             jwt.verify(token, process.env.privateKey, async (err, payload) => {
                 console.log({ payload });
-
                 if (err) return res.status(401).send({ error: 'you must be logged in' })
                 const userData = payload;
                 const user = await User.findById(userData._id);
-
                 if (user) req.user = user;
                 else return res.status(401).send({ error: 'you must be logged in' })
                 next();

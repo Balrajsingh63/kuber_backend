@@ -1,21 +1,21 @@
 const mongoose = require("mongoose");
 
 const gameModel = new mongoose.Schema({
-    gameName: {
+    name: {
         type: String
     },
-    gameNumber: {
-        type: Number
-    },
-    gameStartTime: {
+    // number: {
+    //     type: Number
+    // },
+    startTime: {
         type: String
     },
-    gameEndTime: {
+    endTime: {
         type: String
     },
-    gameDate: {
-        type: Date
-    },
+    // date: {
+    //     type: Date
+    // },
     status: {
         type: String,
         enum: ["active", "deactive"],

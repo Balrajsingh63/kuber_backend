@@ -21,7 +21,6 @@ class GameController {
      */
     async gamePlay(req, res) {
         let { gameNumber, type } = req.body;
-        console.log({ gameNumber });
         let game = await gameRequestModel.create({
             gameDate: new Date(),
             userId: (req.user._id),
