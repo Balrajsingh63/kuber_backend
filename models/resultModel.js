@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const resultModel = new mongoose.Schema({
     gameId: {
-        type: mongoose.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "games"
     },
     number: {

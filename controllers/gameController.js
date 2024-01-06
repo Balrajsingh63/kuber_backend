@@ -2,7 +2,19 @@ const GameModel = require('../models/gameModel');
 const GameRequestModel = require('../models/gameRequestModel');
 class GameController {
     async index(req, res) {
-        let list = await GameModel.find({});
+        let list = await GameModel.aggregate([{
+            $lookup: {
+                from: "results",
+                localField: "_id",
+                foreignField: "gameId",
+                as: "result"
+            }
+        }, {
+            $unwind: {
+                path: "$result",
+                preserveNullAndEmptyArrays: true
+            }
+        }]);
         return res.json({
             status: true,
             message: "Game list.",
