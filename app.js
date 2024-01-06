@@ -7,11 +7,12 @@ var cors = require("cors");
 var indexRouter = require('./routes/index');
 var mobIndexRoute = require('./routes/mobileRoute/indexRoute');
 var adminRoute = require("./routes/index");
+var { result } = require("./cronJob/gameResultCron");
 const { config } = require('process');
 const db = require("./config/db");
 var app = express();
 require('dotenv').config()
-
+result();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');

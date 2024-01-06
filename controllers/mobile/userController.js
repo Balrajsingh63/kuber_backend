@@ -5,7 +5,8 @@ class UserController {
         const user = await User.find({});
         return res.json({
             data: users,
-            message: "User list"
+            message: "User list",
+            status: true
         })
     }
     // async store(req,res) {

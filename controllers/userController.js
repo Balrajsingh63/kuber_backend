@@ -3,10 +3,10 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 class UserController {
     async index(req, res) {
-        console.log("sdsd");
         const users = await userModel.find({ role: { $ne: "Admin" } });
         return res.status(200).json({
             data: users,
+            status: true,
             message: "User list"
         })
     }
@@ -22,6 +22,5 @@ class UserController {
             status: "Active"
         })
     }
-
 }
 module.exports = new UserController();

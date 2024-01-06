@@ -39,11 +39,11 @@ class AuthController {
             const { name, phone, password, email } = req.body;
             await userModel.create({
                 name: name,
-                // email:email,
+                // email: email,
                 mobile: (phone),
                 password: await bcrypt.hashSync(password, saltRounds),
                 role: "Customer",
-                status: "Deactive"
+                status: "Deactivate"
             })
             res.status(201).json({
                 status: true,

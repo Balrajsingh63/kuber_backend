@@ -11,7 +11,7 @@ class GameController {
     }
 
     async gameRequestList(req, res) {
-        let list = await GameRequestModel.find({});
+        let list = await GameRequestModel.find({}).populate("userId");
         return res.json({
             status: true,
             message: "Game list.",

@@ -5,6 +5,10 @@ const paymentModel = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: "users"
     },
+    gameRequestId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "gamerequestmodels"
+    },
     transactionId: {
         type: String
     },
