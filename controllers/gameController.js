@@ -11,17 +11,17 @@ class GameController {
     }
 
     async gameRequestList(req, res) {
-        let list = await GameRequestModel.find({}).populate("userId");
+        let list = await gameRequestModel.find({}).populate("userId", "name");
         return res.json({
             status: true,
-            message: "Game list.",
+            message: "Game Request list.",
             data: list
         })
     }
 
     async gameCreate(req, res) {
-        const { name, status } = req.body;
-        const storeData = await GameModel.create({ name, status });
+        const { name, startTime, endTime, status } = req.body;
+        const storeData = await GameModel.create({ name, startTime, endTime, status });
         return res.json({
             status: true,
             message: "Game created successfully."

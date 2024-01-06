@@ -10,7 +10,7 @@ class GameController {
         let list = await GameModel.find({});
         return res.json({
             status: true,
-            message: "Your game request successfully created.",
+            message: "Game list.",
             data: list
         })
     }
@@ -22,18 +22,18 @@ class GameController {
      */
     async gamePlay(req, res) {
         let { gameNumber, type } = req.body;
-        let game = await GameModel.findOne({ _id: type });
-        if (game.startTime > moment().format("HH:mm") || game.endTime < moment().format("HH:mm")) {
-            return res.json({
-                message: "Game request not available this time",
-                status: false,
-                data: gameReq
-            })
-        }
+        // let game = await GameModel.findOne({ _id: type });
+        // if (game.startTime > moment().format("HH:mm") || game.endTime < moment().format("HH:mm")) {
+        //     return res.json({
+        //         message: "Game request not available this time",
+        //         status: false,
+        //         data: gameReq
+        //     })
+        // }
         let gameReq = await gameRequestModel.create({
             date: new Date(),
             userId: (req.user._id),
-            number,
+            gameNumber,
             type,
             status: "active"
         });
@@ -41,6 +41,15 @@ class GameController {
             message: "Your game request successfully created.",
             status: true,
             data: gameReq
+        })
+    }
+
+    async gameRequest(req, res) {
+        let list = await gameRequestModel.find({}).populate("userId", "name");
+        return res.json({
+            status: true,
+            message: "Your game request list.",
+            data: list
         })
     }
 }
