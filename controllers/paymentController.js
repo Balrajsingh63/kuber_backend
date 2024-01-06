@@ -1,13 +1,14 @@
 const paymentModel = require("../models/paymentModel");
 
-class Payment {
+class PaymentController {
     async list(req, res) {
-        let data = paymentModel.find({}).populate("userId");
+        let data = await paymentModel.find({}).populate("userId");
         return res.json({
             status: true,
-            data: data
+            data: data,
+            message: "Payment List"
         });
     }
 }
 
-module.exports = new Payment();
+module.exports = new PaymentController();
