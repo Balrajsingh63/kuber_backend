@@ -1,4 +1,5 @@
 const Payment = require("../../models/paymentModel");
+const Transaction = require("../../models/transaction");
 class PaymentController {
 
     /**
@@ -18,7 +19,7 @@ class PaymentController {
 
     async storePayment(req, res) {
         try {
-            const { transactionId, paymentStatus, gameRequestId } = req.body;
+            const { transactionId, paymentStatus, gameRequestId, amount } = req.body;
             let store = await Payment.create({
                 userId: req.user._id,
                 date: new Date(),
@@ -26,6 +27,13 @@ class PaymentController {
                 paymentStatus,
                 gameRequestId
             })
+            let transactions = await Transaction.create({
+                userId: req.user._id,
+                type: 'credit',
+                Date: new Date(),
+                amount: amount,
+                status: "active"
+            });
             return res.json({
                 status: true,
                 message: "Payment successfully done."
@@ -37,7 +45,6 @@ class PaymentController {
                 message: "Somthing want worng ! try again later"
             });
         }
-
     }
 }
 module.exports = new PaymentController();

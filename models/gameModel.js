@@ -4,18 +4,15 @@ const gameModel = new mongoose.Schema({
     name: {
         type: String
     },
-    // number: {
-    //     type: Number
-    // },
+    resultTime: {
+        type: String
+    },
     startTime: {
         type: String
     },
     endTime: {
         type: String
     },
-    // date: {
-    //     type: Date
-    // },
     status: {
         type: String,
         enum: ["active", "deactive"],

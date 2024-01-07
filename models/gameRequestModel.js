@@ -15,7 +15,7 @@ const RequestModel = new mongoose.Schema({
             type: Number
         }
     }],
-    gameDate: {
+    date: {
         type: Date
     },
     status: {

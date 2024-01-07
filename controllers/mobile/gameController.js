@@ -34,6 +34,7 @@ class GameController {
             date: new Date(),
             userId: (req.user._id),
             gameNumber,
+            date: new Date(),
             type,
             status: "active"
         });
