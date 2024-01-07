@@ -27,7 +27,8 @@ class PaymentController {
                 date: new Date(),
                 transactionId,
                 paymentStatus,
-                gameRequestId: gameRequestId != '' ? gameRequestId : null
+                amount: amount,
+                gameRequestId: gameRequestId != "" ? gameRequestId : null
             })
             let transactions = await Transaction.create({
                 userId: req.user._id,
@@ -37,9 +38,8 @@ class PaymentController {
                 status: "active"
             });
             const user = await userModel.findOne({ "_id": req.user._id });
-            await user.updateOne({ "wallet": Number(user.wallet) + Number(amount) });
+            await user.updateOne({ wallet: Number(user.wallet) + Number(amount) });
             console.log(user);
-
             return res.json({
                 status: true,
                 message: "Payment successfully done."

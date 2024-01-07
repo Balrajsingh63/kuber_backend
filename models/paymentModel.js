@@ -15,6 +15,9 @@ const paymentModel = new mongoose.Schema({
     paymentStatus: {
         type: String
     },
+    amount: {
+        type: Number
+    },
     date: {
         type: Date
     }
