@@ -35,9 +35,8 @@ class PaymentController {
                 amount: amount,
                 status: "active"
             });
-            const user = await userModel.findOne({ "_id": req.user._id }).lean;
-            user.wallet = user.wallet + amount;
-            await user.save();
+            const user = await userModel.findOne({ "_id": req.user._id });
+            await user.updateOne({ wallet: user.wallet + Number(amount) });
             return res.json({
                 status: true,
                 message: "Payment successfully done."

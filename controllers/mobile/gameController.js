@@ -94,7 +94,7 @@ class GameController {
       * @param {*} req
       * @param {*} res
       * @returns
-     */
+      **/
     async gameRequest(req, res) {
         let list = await gameRequestModel.find({}).populate("userId", "name");
         return res.json({

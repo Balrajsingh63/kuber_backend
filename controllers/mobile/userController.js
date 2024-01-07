@@ -9,6 +9,15 @@ class UserController {
             status: true
         })
     }
+
+    async userDetail(req, res) {
+        const user = await User.findOne({ _id: req.user._id });
+        return res.json({
+            data: user,
+            message: "User Detail list",
+            status: true
+        })
+    }
     // async store(req,res) {
 
     // }
