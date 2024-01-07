@@ -7,7 +7,9 @@ const saltRounds = 10;
 class AuthController {
     async login(req, res) {
         let { phone, password } = req.body;
-        let user = await userModel.findOne({ mobile: phone }).lean();
+        let user = await userModel.findOne({
+            mobile: phone, role: "Customer"
+        }).lean();
         if (!user) {
             return res.status(200).json({
                 status: false,

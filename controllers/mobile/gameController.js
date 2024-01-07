@@ -7,7 +7,19 @@ class GameController {
      * Game List
      */
     async gameList(req, res) {
-        let list = await GameModel.find({});
+        let list = await GameModel.aggregate([{
+            $lookup: {
+                from: "results",
+                localField: "_id",
+                foreignField: "gameId",
+                as: "result"
+            }
+        }, {
+            $unwind: {
+                path: "$result",
+                preserveNullAndEmptyArrays: true
+            }
+        }]);
         return res.json({
             status: true,
             message: "Game list.",
@@ -15,14 +27,14 @@ class GameController {
         })
     }
     /**
-     * Game Request 
-     * @param {*} req 
-     * @param {*} res 
-     * @returns 
-     */
+     * Game Request
+     * @param {*} req
+                            * @param {*} res
+                            * @returns
+                            */
     async gamePlay(req, res) {
         let { gameNumber, type } = req.body;
-        // let game = await GameModel.findOne({ _id: type });
+        // let game = await GameModel.findOne({_id: type });
         // if (game.startTime > moment().format("HH:mm") || game.endTime < moment().format("HH:mm")) {
         //     return res.json({
         //         message: "Game request not available this time",
