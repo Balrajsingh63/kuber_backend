@@ -1,5 +1,6 @@
 const Payment = require("../../models/paymentModel");
 const Transaction = require("../../models/transaction");
+const userModel = require("../../models/userModel");
 class PaymentController {
 
     /**
@@ -34,6 +35,9 @@ class PaymentController {
                 amount: amount,
                 status: "active"
             });
+            const user = await userModel.findOne({ "_id": req.user._id }).lean;
+            user.wallet = user.wallet + amount;
+            await user.save();
             return res.json({
                 status: true,
                 message: "Payment successfully done."

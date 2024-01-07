@@ -16,6 +16,10 @@ const UserModel = new mongoose.Schema({
     age: {
         type: String
     },
+    wallet: {
+        type: Number,
+        default: 0
+    },
     role: {
         type: String,
         enum: ["Admin", "SubAdmin", "Customer"],
