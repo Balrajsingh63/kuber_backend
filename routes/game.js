@@ -7,4 +7,5 @@ const { isAdmin } = require('../middleware/isAdminMiddleware');
 router.get("/index", getToken, isAdmin, gameController.index);
 router.get("/request", getToken, isAdmin, gameController.gameRequestList);
 router.post("/store", getToken, isAdmin, gameController.gameCreate);
+router.post("/result", getToken, isAdmin, gameController.gameResult);
 module.exports = router;

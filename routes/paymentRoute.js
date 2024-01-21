@@ -5,5 +5,6 @@ const { isAdmin } = require("../middleware/isAdminMiddleware");
 const router = express.Router();
 
 router.get("/", getToken, isAdmin, paymentController.list);
+router.post("/approve-request", getToken, isAdmin, paymentController.approvedWithdrawalRequest);
 
 module.exports = router;

@@ -41,12 +41,15 @@ class GameController {
         try {
             let { gameNumber, type } = req.body;
             let game = await GameModel.findOne({ _id: type });
-            if ((moment().format("DD-MM-Y") + " " + game.startTime) > moment().format("DD-MM-Y HH:mm") && ((moment().format("DD-MM-Y") + " " + game.endTime) < moment().format("DD-MM-Y HH:mm"))) {
+            let currentDateTime = moment(new Date());
+            let gameStartDateTime = moment(moment(new Date()).format("DD-MM-Y") + " " + game.startTime, "DD-MM-Y HH:mm");
+            let gameEndDateTime = moment(moment(new Date()).format("DD-MM-Y") + " " + game.endTime, "DD-MM-Y HH:mm");
+            if (!(currentDateTime.isBetween(gameStartDateTime, gameEndDateTime))) {
                 return res.json({
-                    message: "Game request not available this time",
+                    message: "Game request not available at this time",
                     status: false,
                     data: gameReq
-                })
+                });
             }
             const user = await userModel.findOne({ _id: req.user._id });
             const sum = gameNumber?.reduce((accumulator, object) => {
@@ -58,7 +61,7 @@ class GameController {
                     message: `Please add money your wallet`
                 })
             }
-            let gameReq = await gameRequestModel.create({
+            var gameReq = await gameRequestModel.create({
                 date: new Date(),
                 userId: (req.user._id),
                 gameNumber,
@@ -77,12 +80,12 @@ class GameController {
             return res.json({
                 message: "Your game request successfully created.",
                 status: true,
-                data: ""
+                data: gameReq
             })
         } catch (error) {
             console.log(error.message)
             return res.json({
-                message: "Your game request successfully created.",
+                message: "Something went wrong.",
                 status: false,
                 data: {}
             })
@@ -95,13 +98,144 @@ class GameController {
       * @param {*} res
       * @returns
       **/
+    // async gameRequest(req, res) {
+    //     let list = await gameRequestModel.aggregate([{
+    //         $lookup: {
+    //             from: "users",
+    //             localField: "userId",
+    //             foreignField: "_id",
+    //             as: "users"
+    //         }
+    //     }, {
+    //         $unwind: {
+    //             path: "$users",
+    //             preserveNullAndEmptyArrays: true
+    //         }
+    //     }, {
+    //         $lookup: {
+    //             from: "results",
+    //             let: { gameNumber: "$gameNumber.number", gameDate: "$date" },
+    //             pipeline: [
+    //                 {
+    //                     $match: {
+    //                         $expr: {
+    //                             $and: [
+    //                                 { $eq: ["$number", "$$gameNumber"] },
+    //                                 // { $eq: ["$date", "$$gameDate"] }
+    //                             ]
+    //                         }
+    //                     }
+    //                 }
+    //             ],
+    //             as: "results"
+    //         }
+    //     }, {
+    //         $unwind: {
+    //             path: "$results",
+    //             preserveNullAndEmptyArrays: true
+    //         }
+    //     }, {
+    //         $project: {
+    //             "userId": 1,
+    //             "type": 1,
+    //             "gameNumber": 1,
+    //             "date": 1,
+    //             "status": 1,
+    //             "createdAt": 1,
+    //             "updatedAt": 1,
+    //             users: { name: "$users.name", _id: "$users._id" },
+    //             "results": 1
+    //         }
+    //     }]);
+    //     return res.json({
+    //         status: true,
+    //         message: "Your game request list.",
+    //         data: list
+    //     });
+    // }
+
     async gameRequest(req, res) {
-        let list = await gameRequestModel.find({}).populate("userId", "name");
+        let list = await gameRequestModel.aggregate([
+            {
+                $addFields: {
+                    "formattedDate": {
+                        $dateToString: {
+                            format: "%Y-%m-%d",
+                            date: "$date"
+                        }
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "userId",
+                    foreignField: "_id",
+                    as: "users"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$users",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: "results",
+                    let: { gameNumber: "$gameNumber.number", gameDate: "$formattedDate" },
+                    pipeline: [
+                        {
+                            $addFields: {
+                                "formattedDate": {
+                                    $dateToString: {
+                                        format: "%Y-%m-%d",
+                                        date: "$date"
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$number", "$$gameNumber"] },
+                                        // { $eq: ["$formattedDate", "$$gameDate"] }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: "results"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$results",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    "userId": 1,
+                    "type": 1,
+                    "gameNumber": 1,
+                    "date": 1,
+                    "status": 1,
+                    "createdAt": 1,
+                    "updatedAt": 1,
+                    users: { name: "$users.name", _id: "$users._id" },
+                    "results": 1
+                }
+            }
+        ]);
+
         return res.json({
             status: true,
             message: "Your game request list.",
             data: list
         });
     }
+
 }
 module.exports = new GameController();

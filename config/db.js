@@ -1,6 +1,3 @@
 const mongoose = require("mongoose");
-mongoose.connect("mongodb+srv://kuber:ZXNFyKC4g4X3hqHx@kuberdb.f5uovze.mongodb.net/?retryWrites=true&w=majority", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-});
+mongoose.connect("mongodb+srv://vakeelsingh000:RVrcAyXTrc2pGlMk@cluster0.raieoxa.mongodb.net/?retryWrites=true&w=majority");
 module.exports = mongoose;  

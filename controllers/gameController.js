@@ -1,5 +1,7 @@
+const { default: mongoose } = require('mongoose');
 const GameModel = require('../models/gameModel');
 const GameRequestModel = require('../models/gameRequestModel');
+const Result = require("./../models/resultModel")
 class GameController {
     async index(req, res) {
         let list = await GameModel.aggregate([{
@@ -32,12 +34,49 @@ class GameController {
     }
 
     async gameCreate(req, res) {
-        const { name, startTime, endTime, status } = req.body;
-        const storeData = await GameModel.create({ name, startTime, endTime, status });
+        const { name, startTime, resultTime, endTime, status } = req.body;
+        const storeData = await GameModel.create({ name, resultTime, startTime, endTime, status });
         return res.json({
             status: true,
             message: "Game created successfully."
         })
+    }
+
+    async deleteGame(req, res) {
+        const { _id } = req.params;
+        const game = await GameModel.findOneAndDelete({ _id: mongoose.Types.ObjectId(_id) });
+        return res.json({
+            status: true,
+            message: "Game Deleted Successfully.",
+        });
+    }
+
+    async findGame(req, res) {
+        const { id } = req.params;
+        const game = await GameModel.findOne({ _id: mongoose.Types.ObjectId(id) });
+        return res.json({
+            status: true,
+            data: game
+        });
+    }
+
+    async updateGame(req, res) {
+        const { id } = req.params;
+        const { name, startTime, resultTime, endTime, status } = req.body;
+        const storeData = await GameModel.findOneAndUpdate({ _id: mongoose.Types.ObjectId(id) }, { name, resultTime, startTime, endTime, status });
+        return res.json({
+            status: true,
+            message: "Game Updated successfully."
+        })
+    }
+
+    async gameResult(req, res) {
+        const { startTime, endTime, number, resultTime } = req.body;
+        const result = await Result.create({ startTime, endTime, number, resultTime })
+        return res.json({
+            data: result,
+            message: "Game result updated successfully"
+        });
     }
 }
 module.exports = new GameController();

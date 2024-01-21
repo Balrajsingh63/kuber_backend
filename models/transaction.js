@@ -16,7 +16,7 @@ const TransactionModel = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['active', "deactivate"],
+        enum: ['active', "deactivate", "cancel"],
         default: "active"
     }
 }, {

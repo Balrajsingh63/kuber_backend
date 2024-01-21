@@ -1,4 +1,5 @@
 const paymentModel = require("../models/paymentModel");
+const WithdrawalMoney = require("../models/moneyRequestModel");
 
 class PaymentController {
     async list(req, res) {
@@ -29,6 +30,18 @@ class PaymentController {
             data: data,
             message: "Payment List"
         });
+    }
+
+    async approvedWithdrawalRequest(req, res) {
+        const { requestId, status } = req.body;
+        const request = await WithdrawalMoney.findOne({
+            _id: requestId
+        });
+        await request.updateOne({ status: "approve" });
+        return res.json({
+            status: true,
+            message: "Payment request status successfully changed"
+        })
     }
 }
 
