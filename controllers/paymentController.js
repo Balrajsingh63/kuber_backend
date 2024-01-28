@@ -43,6 +43,13 @@ class PaymentController {
             message: "Payment request status successfully changed"
         })
     }
+    async withdrawalMoneyList(req, res) {
+        const list = await WithdrawalMoney.find({});
+        return res.json({
+            status: true,
+            data: list
+        })
+    }
 }
 
 module.exports = new PaymentController();

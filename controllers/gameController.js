@@ -71,8 +71,8 @@ class GameController {
     }
 
     async gameResult(req, res) {
-        const { startTime, endTime, number, resultTime } = req.body;
-        const result = await Result.create({ startTime, endTime, number, resultTime })
+        const { startTime, endTime, number, resultTime, gameId } = req.body;
+        const result = await Result.create({ startTime, endTime, number, resultTime, gameId })
         return res.json({
             data: result,
             message: "Game result updated successfully"

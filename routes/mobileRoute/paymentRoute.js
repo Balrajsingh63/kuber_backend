@@ -6,6 +6,7 @@ const { getToken } = require('../../middleware/authenticationMiddleware');
 router.get("/", getToken, paymentController.paymentHistory);
 router.post("/", getToken, paymentController.storePayment);
 router.post("/withdrawal-request", getToken, paymentController.withdrawalMoneyRequest);
-router.post("/cnacel/withdrawal-request", getToken, paymentController.cancelWithdrawalRequest);
+router.post("/cancel/withdrawal-request", getToken, paymentController.cancelWithdrawalRequest);
+router.get("/withdrawal-request-list", getToken, paymentController.requestList);
 
 module.exports = router;

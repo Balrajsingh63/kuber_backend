@@ -87,7 +87,7 @@ class PaymentController {
                 transactionId: request._id,
                 paymentStatus: "pending",
                 amount: amount,
-                gameRequestId: gameRequestId != "" ? gameRequestId : null
+                // gameRequestId: gameRequestId != "" ? gameRequestId : null
             });
             let transactions = await Transaction.create({
                 userId: _id,
@@ -150,6 +150,15 @@ class PaymentController {
             });
         }
 
+    }
+
+    async requestList(req, res) {
+        const { _id } = req.user;
+        const list = await WithdrawalMoney.find({});
+        return res.json({
+            status: true,
+            data: list
+        })
     }
 }
 module.exports = new PaymentController();
