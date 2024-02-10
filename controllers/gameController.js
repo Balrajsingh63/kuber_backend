@@ -4,19 +4,36 @@ const GameRequestModel = require('../models/gameRequestModel');
 const Result = require("./../models/resultModel")
 class GameController {
     async index(req, res) {
-        let list = await GameModel.aggregate([{
-            $lookup: {
-                from: "results",
-                localField: "_id",
-                foreignField: "gameId",
-                as: "result"
+        const currentTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        let list = await GameModel.aggregate([
+            {
+                $lookup: {
+                    from: "results",
+                    let: { gameId: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$gameId", "$$gameId"] },
+                                        { $gte: ["$resultTime", currentTime] } // Filter by result time being greater than or equal to the current time
+                                    ]
+                                }
+                            }
+                        }, {
+                            $limit: 1
+                        }
+                    ],
+                    as: "result",
+                }
+            },
+            {
+                $unwind: {
+                    path: "$result",
+                    preserveNullAndEmptyArrays: true
+                }
             }
-        }, {
-            $unwind: {
-                path: "$result",
-                preserveNullAndEmptyArrays: true
-            }
-        }]);
+        ]);
         return res.json({
             status: true,
             message: "Game list.",

@@ -2,6 +2,7 @@ const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 class AuthenticationMiddlware {
     getToken(req, res, next) {
+        console.log("dsd");
         const { authorization } = req.headers;
         try {
 

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "nodemon app.js"
   },
   "dependencies": {
     "api": "^6.1.1",
@@ -22,6 +22,7 @@
     "morgan": "~1.9.1",
     "node-cron": "^3.0.3",
     "nodemon": "^3.0.1",
-    "paytmchecksum": "^1.5.1"
+    "paytmchecksum": "^1.5.1",
+    "socket.io": "^4.7.4"
   }
 }

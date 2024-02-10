@@ -5,7 +5,6 @@ const gameRoutes = require('../mobileRoute/gameRoute');
 const usersRoutes = require("../mobileRoute/usersRoute");
 const authRoutes = require("../authRoute");
 const settingRouter = require("./settingRoute");
-
 router.use("/", authRoutes)
 router.use("/users", usersRoutes);
 router.use("/game", gameRoutes)
