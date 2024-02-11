@@ -9,6 +9,7 @@ var indexRouter = require('./routes/index');
 var mobIndexRoute = require('./routes/mobileRoute/indexRoute');
 var adminRoute = require("./routes/index");
 var { result } = require("./cronJob/gameResultCron");
+const Result = require("./models/resultModel");
 const { config } = require('process');
 const db = require("./config/db");
 const { Server } = require("socket.io");
@@ -32,9 +33,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use("/v1/admin", adminRoute)
 app.use('/v1/app', mobIndexRoute);
 
-app.get("/test", (req, res) => {
-  console.log("aayya");
-})
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
@@ -50,13 +48,23 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
+const connectedUser = {};
 io.on("connection", (socket) => {
   console.log("connected socket")
   socket.on("disconnect", (reason) => {
-    console.log("disconnect socket")
+    console.log("disconnect socket", reason)
   });
+  socket.on('create', function (room) {
+    socket.join(room);
+  });
+  socket.on("result", async ({ startTime, endTime, number, resultTime, gameId }) => {
+    const result = await Result.create({ startTime, endTime, number, resultTime, gameId })
+    io.emit("result_reload", { status: true });
+
+  })
+
 });
+
 
 httpServer.listen(3006, () => {
   console.log("server connected successfully")

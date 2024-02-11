@@ -12,8 +12,15 @@ class GameController {
     * @returns
    */
     async gameList(req, res) {
-        const currentTime = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        const currentDate = new Date(); // Current date
+        const currentDateString = currentDate.toISOString().split('T')[0]; // Get the current date string
+
         let list = await GameModel.aggregate([
+            {
+                $match: {
+                    createdAt: { $lte: currentDate } // Filter by createdAt date being less than or equal to the current date for GameModel
+                }
+            },
             {
                 $lookup: {
                     from: "results",
@@ -21,19 +28,30 @@ class GameController {
                     pipeline: [
                         {
                             $match: {
-                                $expr: {
-                                    $and: [
-                                        { $eq: ["$gameId", "$$gameId"] },
-                                        { $gte: ["$resultTime", currentTime] } // Filter by result time being greater than or equal to the current time
-                                    ]
-                                }
+                                $and: [
+                                    { $expr: { $eq: ["$gameId", "$$gameId"] } }, // Use $expr to compare gameId
+                                    // { $gte: ["$resultTime", currentTime] } // Filter by resultTime being greater than or equal to the current time
+                                ]
                             }
-                        }, {
+                        },
+                        {
+                            $project: {
+                                gameId: 1,
+                                resultTime: 1,
+                                number: 1,
+                                createdAtString: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } } // Project createdAt as a string
+                            }
+                        },
+                        {
+                            $match: {
+                                createdAtString: currentDateString // Compare createdAt date string with the current date string
+                            }
+                        },
+                        {
                             $limit: 1
                         }
                     ],
                     as: "result",
-
                 }
             },
             {
