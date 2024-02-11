@@ -80,8 +80,8 @@ class GameController {
     }
 
     async deleteGame(req, res) {
-        const { _id } = req.params;
-        const game = await GameModel.findOneAndDelete({ _id: mongoose.Types.ObjectId(_id) });
+        const { id } = req.params;
+        const game = await GameModel.findOneAndDelete({ _id: new mongoose.Types.ObjectId(id) });
         return res.json({
             status: true,
             message: "Game Deleted Successfully.",
@@ -100,7 +100,7 @@ class GameController {
     async updateGame(req, res) {
         const { id } = req.params;
         const { name, startTime, resultTime, endTime, status } = req.body;
-        const storeData = await GameModel.findOneAndUpdate({ _id: mongoose.Types.ObjectId(id) }, { name, resultTime, startTime, endTime, status });
+        const storeData = await GameModel.findOneAndUpdate({ _id: new mongoose.Types.ObjectId(id) }, { name, resultTime, startTime, endTime, status });
         return res.json({
             status: true,
             message: "Game Updated successfully."
