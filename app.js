@@ -14,10 +14,12 @@ const { config } = require('process');
 const db = require("./config/db");
 const { Server } = require("socket.io");
 var app = express();
+
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
   cors: "*"
 });
+
 require('dotenv').config()
 result();
 // view engine setup
@@ -48,15 +50,19 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-const connectedUser = {};
-io.on("connection", (socket) => {
-  console.log("connected socket")
+
+io.on("connect", (socket) => {
+  console.log("connected socket ******", `${socket.id}`)
+
   socket.on("disconnect", (reason) => {
+    socket.disconnect()
     console.log("disconnect socket", reason)
   });
+
   socket.on('create', function (room) {
     socket.join(room);
   });
+
   socket.on("result", async ({ startTime, endTime, number, resultTime, gameId }) => {
     const result = await Result.create({ startTime, endTime, number, resultTime, gameId })
     io.emit("result_reload", { status: true });
