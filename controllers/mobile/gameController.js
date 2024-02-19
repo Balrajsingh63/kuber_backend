@@ -86,6 +86,9 @@ class GameController {
             // let gameEndDateTime = moment(moment(new Date()).format("DD-MM-Y") + " " + game.endTime, "DD-MM-Y HH:mm").add(1, 'day');
             let gameEndDateTime = moment(moment(new Date()).format("DD-MM-Y") + " " + game.endTime, "DD-MM-Y HH:mm");
 
+            console.log('currentDateTime **** ', currentDateTime)
+            console.log('gameStartDateTime **** ', gameStartDateTime)
+            console.log('gameEndDateTime **** ', gameEndDateTime)
 
             if (!(currentDateTime.isBetween(gameStartDateTime, gameEndDateTime))) {
                 return res.json({
