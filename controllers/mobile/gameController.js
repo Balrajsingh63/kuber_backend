@@ -1,5 +1,5 @@
 const GameModel = require('../../models/gameModel');
-const { ObjectId } = require("mongoose")
+const { ObjectId, default: mongoose } = require("mongoose")
 const gameRequestModel = require('../../models/gameRequestModel');
 const moment = require("moment");
 const Transaction = require("../../models/transaction");
@@ -67,6 +67,9 @@ class GameController {
             message: "Game list.",
             data: list
         })
+
+
+
     }
     /**
      * Game Play Request
@@ -80,7 +83,10 @@ class GameController {
             let game = await GameModel.findOne({ _id: type });
             let currentDateTime = moment(new Date());
             let gameStartDateTime = moment(moment(new Date()).format("DD-MM-Y") + " " + game.startTime, "DD-MM-Y HH:mm");
+            // let gameEndDateTime = moment(moment(new Date()).format("DD-MM-Y") + " " + game.endTime, "DD-MM-Y HH:mm").add(1, 'day');
             let gameEndDateTime = moment(moment(new Date()).format("DD-MM-Y") + " " + game.endTime, "DD-MM-Y HH:mm");
+
+
             if (!(currentDateTime.isBetween(gameStartDateTime, gameEndDateTime))) {
                 return res.json({
                     message: "Game request not available at this time",
@@ -88,6 +94,7 @@ class GameController {
                     data: gameReq
                 });
             }
+
             const user = await userModel.findOne({ _id: req.user._id });
             const sum = gameNumber?.reduce((accumulator, object) => {
                 return accumulator + object.price;

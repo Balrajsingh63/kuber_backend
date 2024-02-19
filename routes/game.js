@@ -10,4 +10,6 @@ router.post("/store", getToken, isAdmin, gameController.gameCreate);
 router.post("/result", getToken, isAdmin, gameController.gameResult);
 router.delete("/delete/:id", getToken, isAdmin, gameController.deleteGame);
 router.put("/update/:id", getToken, isAdmin, gameController.updateGame);
+router.get("/today-result", getToken, isAdmin, gameController.todayResult);
+router.get("/filter-game", getToken, isAdmin, gameController.filterGame);
 module.exports = router;

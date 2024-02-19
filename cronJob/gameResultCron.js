@@ -4,6 +4,7 @@ const gameModel = require('../models/gameModel');
 const gameRequestModel = require('../models/gameRequestModel');
 const resultModel = require("../models/resultModel");
 const { default: mongoose } = require('mongoose');
+
 class GameResultCron {
     async result() {
 
@@ -51,24 +52,26 @@ class GameResultCron {
                     const findGame = await gameModel.findOne({
                         _id: new mongoose.Types.ObjectId(todayRequest[0]?.data?.type)
                     });
-                    const resultTimeToday = moment(`${moment().format("YYYY-MM-DD")} ${gameInfo.resultTime}`, 'YYYY-MM-DD HH:mm');
+                    // const resultTimeToday = moment(`${moment().format("YYYY-MM-DD")} ${gameInfo.resultTime}`, 'YYYY-MM-DD HH:mm');
 
                     // Add 5 minutes to the result time
-                    const adjustedResultTime = resultTimeToday.add(5, 'minutes');
+                    // const adjustedResultTime = resultTimeToday.add(5, 'minutes');
 
                     // Check if the current time is after the adjusted result time
-                    const isAfterAdjustedResultTime = currentTime.isBetween(resultTimeToday, adjustedResultTime);
+                    // const isAfterAdjustedResultTime = currentTime.isBetween(resultTimeToday, adjustedResultTime);
+
                     // Check if the current time is between the start time and end time
                     // const isWithinTimeRange = currentTime.isBetween(startTimeToday, endTimeToday);
-                    if (isAfterAdjustedResultTime) {
-                        let gameResult = await resultModel.create({
-                            gameId: findGame._id,
-                            number: todayRequest[0].id,
-                            startTime: findGame.startTime,
-                            endTime: findGame.endTime,
-                            date: new Date(),
-                        });// Log the result for debugging
-                    }
+
+                    // if (isAfterAdjustedResultTime) {
+                    //     let gameResult = await resultModel.create({
+                    //         gameId: findGame._id,
+                    //         number: todayRequest[0].id,
+                    //         startTime: findGame.startTime,
+                    //         endTime: findGame.endTime,
+                    //         date: new Date(),
+                    //     });// Log the result for debugging
+                    // }
                 }
 
             } catch (error) {

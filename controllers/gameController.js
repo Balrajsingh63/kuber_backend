@@ -2,6 +2,7 @@ const { default: mongoose } = require('mongoose');
 const GameModel = require('../models/gameModel');
 const GameRequestModel = require('../models/gameRequestModel');
 const Result = require("./../models/resultModel")
+const moment = require('moment');
 class GameController {
     async index(req, res) {
         const currentDate = new Date(); // Current date
@@ -10,7 +11,7 @@ class GameController {
         let list = await GameModel.aggregate([
             {
                 $match: {
-                    createdAt: { $lte: currentDate } // Filter by createdAt date being less than or equal to the current date for GameModel
+                    createdAt: { $lte: currentDate }
                 }
             },
             {
@@ -62,7 +63,47 @@ class GameController {
     }
 
     async gameRequestList(req, res) {
-        let list = await GameRequestModel.find({}).populate("userId", "name");
+        let list = await GameRequestModel.aggregate([
+            {
+                $addFields: {
+                    "today": {
+                        $dateToString: {
+                            format: "%Y-%m-%d",
+                            date: "$date"
+                        }
+                    }
+                }
+            }, {
+                $match: { today: { $eq: moment().format("Y-MM-DD").toString() } }
+            },
+            // {
+            //     $lookup:
+            //     {
+            //         from: "games",
+            //         localField: "name",
+            //         foreignField: "_id",
+            //         as: "games"
+            //     }
+            // },
+            {
+                $unwind: "$gameNumber"
+            },
+            {
+                $group: {
+                    "_id": "$gameNumber.number",
+                    count: { $sum: 1 },
+                    totalPrice: { $sum: "$gameNumber.price" },
+                    data: { $push: "$$ROOT" }
+                }
+            },
+            {
+                $unwind: "$data"
+            },
+            {
+                $sort: { totalPrice: 1 }
+            }
+        ]
+        );
         return res.json({
             status: true,
             message: "Game Request list.",
@@ -115,5 +156,181 @@ class GameController {
             message: "Game result updated successfully"
         });
     }
+
+    async todayResult(req, res) {
+        let todayRequest = await GameRequestModel.aggregate([
+            {
+                $addFields: {
+                    "today": {
+                        $dateToString: {
+                            format: "%Y-%m-%d",
+                            date: "$date"
+                        }
+                    }
+                }
+            }, {
+                $match: { today: { $eq: moment().format("Y-MM-DD").toString() } }
+            },
+            {
+                $unwind: "$gameNumber"
+            },
+            {
+                $group: {
+                    "_id": "$gameNumber.number",
+                    count: { $sum: 1 },
+                    totalPrice: { $sum: "$gameNumber.price" },
+                    minPrice: { $min: "$gameNumber.price" },
+                    minCount: { $min: { $sum: 1 } },
+                    data: { $push: "$$ROOT" }
+                }
+            },
+            {
+                $unwind: "$data"
+            },
+            {
+                $sort: { totalPrice: 1 }
+            }
+
+        ]);
+        return res.json({
+            data: todayRequest,
+            message: "Game totle Amount result successfully"
+        });
+    }
+
+
+    // async filterGame(req, res) {
+    //     const { gameId, date } = req.query;
+    //     let filterData = await GameModel.aggregate([
+    //         {
+    //             $match: { _id: new mongoose.Types.ObjectId(gameId) }
+    //         },
+    //         {
+    //             $lookup: {
+    //                 from: "gamerequestmodels",
+    //                 let: { gameId: "$_id" },
+    //                 pipeline: [
+    //                     {
+    //                         $match: {
+    //                             $expr: {
+    //                                 $and: [
+    //                                     { $eq: ["$type", "$$gameId"] },
+    //                                     { $eq: [{ $dateToString: { format: "%Y-%m-%d", date: "$date" } }, moment(date).format("YYYY-MM-DD")] }
+    //                                 ]
+    //                             }
+    //                         }
+    //                     },
+
+    //                     {
+    //                         $unwind: "$gameNumber"
+    //                     },
+    //                     {
+    //                         $group: {
+    //                             "_id": "$gameNumber.number",
+    //                             count: { $sum: 1 },
+    //                             totalPrice: { $sum: "$gameNumber.price" },
+    //                             data: { $push: "$$ROOT" }
+    //                         },
+    //                     },
+    //                     {
+    //                         $unwind: "$data"
+    //                     },
+    //                     {
+    //                         $sort: { totalPrice: 1 }
+    //                     }
+    //                 ],
+    //                 as: "gameRequest"
+    //             }
+    //         }
+    //     ]);
+
+    //     function removeDuplicates(arr) {
+    //         let uniqueArr = [...new Set(arr.map(item => item._id))];
+    //         return uniqueArr.map(_id => arr.find(item => item._id === _id));
+    //     }
+
+    //     const finalResult = filterData?.map((p_item, index) => {
+
+    //         let removeDupl = removeDuplicates(p_item?.gameRequest);
+    //         return { ...p_item, gameRequest: removeDupl }
+
+    //     })
+
+    //     console.log("finalResult ******* ", filterData);
+
+    //     return res.json({
+    //         data: finalResult,
+    //         message: "Game Filter List successfully",
+    //         status: true
+    //     });
+    // }
+
+    async filterGame(req, res) {
+        const { gameId, date } = req.query;
+        let filterData = await GameModel.aggregate([
+            {
+                $match: { _id: new mongoose.Types.ObjectId(gameId) }
+            },
+            {
+                $lookup: {
+                    from: "gamerequestmodels",
+                    let: { gameId: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$type", "$$gameId"] },
+                                        { $eq: [{ $dateToString: { format: "%Y-%m-%d", date: "$date" } }, moment(date).format("YYYY-MM-DD")] }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            $unwind: "$gameNumber"
+                        },
+                        {
+                            $group: {
+                                "_id": "$gameNumber.number",
+                                count: { $sum: 1 },
+                                totalPrice: { $sum: "$gameNumber.price" },
+                                // data: {
+                                //     $addToSet: {
+                                //         number: "$gameNumber.number",
+                                //     }
+                                // }
+                            }
+                        },
+                        // {
+                        //     $unwind: "$data"
+                        // },
+                        {
+                            $sort: { totalPrice: 1 }
+                        },
+                        {
+                            $group: {
+                                _id: "$_id",
+                                count: { $first: "$count" },
+                                totalPrice: { $first: "$totalPrice" },
+                                // data: { $addToSet: "$data" }
+                            }
+                        }
+                    ],
+                    as: "gameRequest"
+                }
+            }
+        ]);
+
+        return res.json({
+            data: filterData,
+            message: "Game Filter List successfully",
+            status: true
+        });
+    }
+
+
 }
+
 module.exports = new GameController();
+
+

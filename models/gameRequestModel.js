@@ -5,7 +5,8 @@ const RequestModel = new mongoose.Schema({
         ref: "User"
     },
     type: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "game"
     },
     gameNumber: [{
         number: {
