@@ -79,6 +79,7 @@ class GameController {
     */
     async gamePlay(req, res) {
         try {
+            console.log("current Date", moment(new Date()));
             let { gameNumber, type } = req.body;
             let game = await GameModel.findOne({ _id: type });
             let currentDateTime = moment(new Date());
