@@ -62,6 +62,7 @@ class GameController {
         })
     }
 
+
     async gameRequestList(req, res) {
         let list = await GameRequestModel.aggregate([
             {
@@ -73,18 +74,19 @@ class GameController {
                         }
                     }
                 }
-            }, {
+            },
+            {
                 $match: { today: { $eq: moment().format("Y-MM-DD").toString() } }
             },
-            // {
-            //     $lookup:
-            //     {
-            //         from: "games",
-            //         localField: "name",
-            //         foreignField: "_id",
-            //         as: "games"
-            //     }
-            // },
+            {
+                $lookup:
+                {
+                    from: "games",
+                    localField: "type",
+                    foreignField: "_id",
+                    as: "games"
+                }
+            },
             {
                 $unwind: "$gameNumber"
             },
@@ -93,23 +95,18 @@ class GameController {
                     "_id": "$gameNumber.number",
                     count: { $sum: 1 },
                     totalPrice: { $sum: "$gameNumber.price" },
-                    data: { $push: "$$ROOT" }
+                    data: { $addToSet: "$$ROOT" }
                 }
             },
-            {
-                $unwind: "$data"
-            },
-            {
-                $sort: { totalPrice: 1 }
-            }
-        ]
-        );
+        ]);
         return res.json({
             status: true,
             message: "Game Request list.",
             data: list
-        })
+        });
     }
+
+
 
     async gameCreate(req, res) {
         const { name, startTime, resultTime, endTime, status } = req.body;
@@ -157,6 +154,8 @@ class GameController {
         });
     }
 
+    /** this api not used */
+
     async todayResult(req, res) {
         let todayRequest = await GameRequestModel.aggregate([
             {
@@ -197,8 +196,7 @@ class GameController {
             message: "Game totle Amount result successfully"
         });
     }
-
-
+    /** this api not used */
 
     async filterGame(req, res) {
         const { gameId, date } = req.query;
@@ -229,16 +227,8 @@ class GameController {
                                 "_id": "$gameNumber.number",
                                 count: { $sum: 1 },
                                 totalPrice: { $sum: "$gameNumber.price" },
-                                // data: {
-                                //     $addToSet: {
-                                //         number: "$gameNumber.number",
-                                //     }
-                                // }
                             }
                         },
-                        // {
-                        //     $unwind: "$data"
-                        // },
                         {
                             $sort: { totalPrice: 1 }
                         },
@@ -247,7 +237,6 @@ class GameController {
                                 _id: "$_id",
                                 count: { $first: "$count" },
                                 totalPrice: { $first: "$totalPrice" },
-                                // data: { $addToSet: "$data" }
                             }
                         }
                     ],
