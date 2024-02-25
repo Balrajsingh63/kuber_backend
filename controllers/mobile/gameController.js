@@ -292,7 +292,7 @@ class GameController {
                 }
             }
         ]);
-
+        console.log({ list });
         return res.json({
             status: true,
             message: "Your game request list.",
