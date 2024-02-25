@@ -228,6 +228,7 @@ class GameController {
                     preserveNullAndEmptyArrays: true
                 }
             },
+
             {
                 $lookup: {
                     from: "results",
@@ -256,10 +257,23 @@ class GameController {
                     ],
                     as: "results"
                 }
+            }, {
+                $lookup: {
+                    from: "games",
+                    localField: "type",
+                    foreignField: "_id",
+                    as: "games"
+                }
             },
             {
                 $unwind: {
                     path: "$results",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $unwind: {
+                    path: "$games",
                     preserveNullAndEmptyArrays: true
                 }
             },
@@ -272,6 +286,7 @@ class GameController {
                     "status": 1,
                     "createdAt": 1,
                     "updatedAt": 1,
+                    "games": { name: "$games.name" },
                     users: { name: "$users.name", _id: "$users._id" },
                     "results": 1
                 }
