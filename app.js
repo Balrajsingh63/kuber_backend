@@ -21,7 +21,7 @@ var https_options = {
   cert: fs.readFileSync("/etc/nginx/ssl/certificate.crt"),
   ca: fs.readFileSync('/etc/nginx/ssl/ca_bundle.crt')
 };
-console.log(fs.readFileSync('/etc/nginx/ssl/ca_bundle.crt'), "test");
+
 const httpServer = https.createServer(https_options, app);
 const io = new Server(httpServer, {
   cors: "*"
