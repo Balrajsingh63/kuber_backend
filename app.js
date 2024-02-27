@@ -1,6 +1,8 @@
 var createError = require('http-errors');
 var express = require('express');
 const http = require("http")
+const fs = require("fs");
+var https = require('https');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -14,8 +16,12 @@ const { config } = require('process');
 const db = require("./config/db");
 const { Server } = require("socket.io");
 var app = express();
-
-const httpServer = http.createServer(app);
+var https_options = {
+  key: fs.readFileSync("/etc/nginx/ssl/private.key"),
+  cert: fs.readFileSync("/etc/nginx/ssl/certificate.crt"),
+  ca: fs.readFileSync('/etc/nginx/ssl/ca_bundle.crt')
+};
+const httpServer = https.createServer(https_options, app);
 const io = new Server(httpServer, {
   cors: "*"
 });
