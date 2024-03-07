@@ -5,6 +5,7 @@ const Payment = require("../../models/paymentModel");
 const Transaction = require("../../models/transaction");
 const userModel = require("../../models/userModel");
 const https = require('https');
+const { default: mongoose } = require("mongoose");
 class PaymentController {
 
     /**
@@ -216,7 +217,7 @@ class PaymentController {
 
     async requestList(req, res) {
         const { _id } = req.user;
-        const list = await WithdrawalMoney.find({});
+        const list = await WithdrawalMoney.find({ _id: new mongoose.Types.ObjectId(_id) });
         return res.json({
             status: true,
             data: list

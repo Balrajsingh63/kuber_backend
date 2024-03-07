@@ -62,7 +62,6 @@ class GameController {
         })
     }
 
-
     async gameRequestList(req, res) {
         let list = await GameRequestModel.aggregate([
             {
@@ -105,8 +104,6 @@ class GameController {
             data: list
         });
     }
-
-
 
     async gameCreate(req, res) {
         const { name, startTime, resultTime, endTime, status } = req.body;

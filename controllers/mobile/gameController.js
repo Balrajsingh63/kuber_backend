@@ -203,94 +203,99 @@ class GameController {
     // }
 
     async gameRequest(req, res) {
-        let list = await gameRequestModel.aggregate([
-            {
-                $addFields: {
-                    "formattedDate": {
-                        $dateToString: {
-                            format: "%Y-%m-%d",
-                            date: "$date"
-                        }
+        const { _id } = req.user;
+        let list = await gameRequestModel.aggregate([{
+            $match: {
+                _id: new mongoose.Types.ObjectId(_id)
+            }
+        },
+        {
+            $addFields: {
+                "formattedDate": {
+                    $dateToString: {
+                        format: "%Y-%m-%d",
+                        date: "$date"
                     }
                 }
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "userId",
-                    foreignField: "_id",
-                    as: "users"
-                }
-            },
-            {
-                $unwind: {
-                    path: "$users",
-                    preserveNullAndEmptyArrays: true
-                }
-            },
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "userId",
+                foreignField: "_id",
+                as: "users"
+            }
+        },
+        {
+            $unwind: {
+                path: "$users",
+                preserveNullAndEmptyArrays: true
+            }
+        },
 
-            {
-                $lookup: {
-                    from: "results",
-                    let: { gameNumber: "$gameNumber.number", gameDate: "$formattedDate" },
-                    pipeline: [
-                        {
-                            $addFields: {
-                                "formattedDate": {
-                                    $dateToString: {
-                                        format: "%Y-%m-%d",
-                                        date: "$date"
-                                    }
-                                }
-                            }
-                        },
-                        {
-                            $match: {
-                                $expr: {
-                                    $and: [
-                                        { $eq: ["$number", "$$gameNumber"] },
-                                        // { $eq: ["$formattedDate", "$$gameDate"] }
-                                    ]
+        {
+            $lookup: {
+                from: "results",
+                let: { gameNumber: "$gameNumber.number", gameDate: "$formattedDate" },
+                pipeline: [
+                    {
+                        $addFields: {
+                            "formattedDate": {
+                                $dateToString: {
+                                    format: "%Y-%m-%d",
+                                    date: "$date"
                                 }
                             }
                         }
-                    ],
-                    as: "results"
-                }
-            }, {
-                $lookup: {
-                    from: "games",
-                    localField: "type",
-                    foreignField: "_id",
-                    as: "games"
-                }
-            },
-            {
-                $unwind: {
-                    path: "$results",
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $unwind: {
-                    path: "$games",
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $project: {
-                    "userId": 1,
-                    "type": 1,
-                    "gameNumber": 1,
-                    "date": 1,
-                    "status": 1,
-                    "createdAt": 1,
-                    "updatedAt": 1,
-                    "games": { name: "$games.name" },
-                    users: { name: "$users.name", _id: "$users._id" },
-                    "results": 1
-                }
+                    },
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    { $eq: ["$number", "$$gameNumber"] },
+                                    // { $eq: ["$formattedDate", "$$gameDate"] }
+                                ]
+                            }
+                        }
+                    }
+                ],
+                as: "results"
             }
+        }, {
+            $lookup: {
+                from: "games",
+                localField: "type",
+                foreignField: "_id",
+                as: "games"
+            }
+        },
+        {
+            $unwind: {
+                path: "$results",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $unwind: {
+                path: "$games",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $project: {
+                "userId": 1,
+                "type": 1,
+                "gameNumber": 1,
+                "date": 1,
+                "status": 1,
+                "createdAt": 1,
+                "updatedAt": 1,
+                "games": { name: "$games.name" },
+                users: { name: "$users.name", _id: "$users._id" },
+                "results": 1
+            }
+        }
         ]);
         console.log({ list });
         return res.json({
