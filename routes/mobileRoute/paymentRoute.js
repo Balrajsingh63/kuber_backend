@@ -8,5 +8,6 @@ router.post("/", getToken, paymentController.storePayment);
 router.post("/withdrawal-request", getToken, paymentController.withdrawalMoneyRequest);
 router.post("/cancel/withdrawal-request", getToken, paymentController.cancelWithdrawalRequest);
 router.get("/withdrawal-request-list", getToken, paymentController.requestList);
+router.get("/paytm-token-request", getToken, paymentController.paytmTokenRequest);
 
 module.exports = router;

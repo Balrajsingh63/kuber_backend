@@ -1,7 +1,10 @@
+
+const PaytmChecksum = require("paytmchecksum");
 const WithdrawalMoney = require("../../models/moneyRequestModel");
 const Payment = require("../../models/paymentModel");
 const Transaction = require("../../models/transaction");
 const userModel = require("../../models/userModel");
+const https = require('https');
 class PaymentController {
 
     /**
@@ -149,6 +152,65 @@ class PaymentController {
                 data: {}
             });
         }
+
+    }
+
+    async paytmTokenRequest(req, res) {
+        var paytmParams = {};
+        paytmParams.body = {
+            "requestType": "Payment",
+            "mid": "MXuCCa19111548144016",
+            "websiteName": "YOUR_WEBSITE_NAME",
+            "orderId": "ORDERID_98765",
+            "callbackUrl": "https://reactnative.dev/",
+            "txnAmount": {
+                "value": "1.00",
+                "currency": "INR",
+            },
+            "userInfo": {
+                "custId": "CUST_001",
+            },
+        };
+
+        PaytmChecksum.generateSignature(JSON.stringify(paytmParams.body), "MXuCCa19111548144016").then(function (checksum) {
+
+            paytmParams.head = {
+                "signature": checksum
+            };
+
+            var post_data = JSON.stringify(paytmParams);
+            console.log('paytmParams **** ', paytmParams)
+            var options = {
+                hostname: 'securegw.paytm.in',
+                port: 443,
+                path: '/theia/api/v1/initiateTransaction?mid=YOUR_MID_HERE&orderId=ORDERID_98765',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': post_data.length
+                }
+            };
+
+            var response = "";
+            var post_req = https.request(options, function (post_res) {
+                post_res.on('data', function (chunk) {
+                    response += chunk;
+                });
+
+                post_res.on('end', function () {
+                    console.log('Response: ', response);
+                });
+            });
+
+            post_req.write(post_data);
+            post_req.end();
+            return res.json({
+                status: true,
+                data: response
+            })
+        }).catch((error) => {
+            console.log('error ** ', error)
+        });
 
     }
 
