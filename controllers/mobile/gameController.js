@@ -206,7 +206,7 @@ class GameController {
         const { _id } = req.user;
         let list = await gameRequestModel.aggregate([{
             $match: {
-                _id: new mongoose.Types.ObjectId(_id)
+                userId: new mongoose.Types.ObjectId(_id)
             }
         },
         {

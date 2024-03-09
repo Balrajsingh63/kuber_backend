@@ -217,7 +217,7 @@ class PaymentController {
 
     async requestList(req, res) {
         const { _id } = req.user;
-        const list = await WithdrawalMoney.find({ _id: new mongoose.Types.ObjectId(_id) });
+        const list = await WithdrawalMoney.find({ userId: new mongoose.Types.ObjectId(_id) });
         return res.json({
             status: true,
             data: list
