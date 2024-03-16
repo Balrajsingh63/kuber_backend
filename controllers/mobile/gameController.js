@@ -14,7 +14,7 @@ class GameController {
     async gameList(req, res) {
         const currentDate = new Date(); // Current date
         const currentDateString = currentDate.toISOString().split('T')[0]; // Get the current date string
-
+        let time = moment("00:00 AM", "hh:mm A")
         let list = await GameModel.aggregate([
             {
                 $match: {
@@ -30,7 +30,7 @@ class GameController {
                             $match: {
                                 $and: [
                                     { $expr: { $eq: ["$gameId", "$$gameId"] } }, // Use $expr to compare gameId
-                                    // { $gte: ["$resultTime", currentTime] } // Filter by resultTime being greater than or equal to the current time
+                                    // { $lte: ["$createdAt", "$$time"] } // Filter by resultTime being greater than or equal to the current time
                                 ]
                             }
                         },
@@ -61,7 +61,20 @@ class GameController {
                 }
             }
         ]);
+        // start
+        for (const iterator of list) {
+            let currentDateTime = moment(new Date());
+            let gameStartDateTime = moment(moment(new Date()).format("DD-MM-Y") + " " + iterator.startTime, "DD-MM-Y HH:mm");
+            // let gameEndDateTime = moment(moment(new Date()).format("DD-MM-Y") + " " + game.endTime, "DD-MM-Y HH:mm").add(1, 'day');
+            let gameEndDateTime = moment(moment(new Date()).format("DD-MM-Y") + " " + iterator.endTime, "DD-MM-Y HH:mm");
+            if (!(currentDateTime.isBetween(gameStartDateTime, gameEndDateTime))) {
+                iterator.openingStatus = "Closed";
+            } else {
+                iterator.openingStatus = "Open";
+            }
+        }
 
+        // end
         return res.json({
             status: true,
             message: "Game list.",
@@ -202,107 +215,186 @@ class GameController {
     //     });
     // }
 
+    // async gameRequest(req, res) {
+    //     const { _id } = req.user;
+    //     let list = await gameRequestModel.aggregate([{
+    //         $match: {
+    //             userId: new mongoose.Types.ObjectId(_id)
+    //         }
+    //     },
+    //     {
+    //         $addFields: {
+    //             "formattedDate": {
+    //                 $dateToString: {
+    //                     format: "%Y-%m-%d",
+    //                     date: "$date"
+    //                 }
+    //             }
+    //         }
+    //     },
+    //     {
+    //         $lookup: {
+    //             from: "users",
+    //             localField: "userId",
+    //             foreignField: "_id",
+    //             as: "users"
+    //         }
+    //     },
+    //     {
+    //         $unwind: {
+    //             path: "$users",
+    //             preserveNullAndEmptyArrays: true
+    //         }
+    //     },
+    //     {
+    //         $lookup: {
+    //             from: "results",
+    //             localField: "gameNumber.number",
+    //             foreignField: "number",
+    //             as: "results"
+    //         }
+    //     },
+    //     {
+    //         $lookup: {
+    //             from: "games",
+    //             localField: "type",
+    //             foreignField: "_id",
+    //             as: "games"
+    //         }
+    //     },
+    //     {
+    //         $unwind: {
+    //             path: "$results",
+    //             preserveNullAndEmptyArrays: true
+    //         }
+    //     },
+    //     {
+    //         $unwind: {
+    //             path: "$games",
+    //             preserveNullAndEmptyArrays: true
+    //         }
+    //     },
+    //     {
+    //         $project: {
+    //             "userId": 1,
+    //             "type": 1,
+    //             "gameNumber": 1,
+    //             "date": 1,
+    //             "status": 1,
+    //             "createdAt": 1,
+    //             "updatedAt": 1,
+    //             "games": { name: "$games.name" },
+    //             users: { name: "$users.name", _id: "$users._id" },
+    //             "results": 1
+    //         }
+    //     }
+    //     ]);
+    //     console.log(list);
+    //     // for (const iterator of list) {
+    //     //     console.log(iterator);
+    //     // }
+    //     console.log({ list });
+    //     return res.json({
+    //         status: true,
+    //         message: "Your game request list.",
+    //         data: list
+    //     });
+    // }
     async gameRequest(req, res) {
-        const { _id } = req.user;
-        let list = await gameRequestModel.aggregate([{
-            $match: {
-                userId: new mongoose.Types.ObjectId(_id)
-            }
-        },
-        {
-            $addFields: {
-                "formattedDate": {
-                    $dateToString: {
-                        format: "%Y-%m-%d",
-                        date: "$date"
+        try {
+            const { _id } = req.user;
+            let list = await gameRequestModel.aggregate([
+                {
+                    $match: {
+                        userId: new mongoose.Types.ObjectId(_id)
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "userId",
+                        foreignField: "_id",
+                        as: "users"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$users",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "games",
+                        localField: "type",
+                        foreignField: "_id",
+                        as: "games"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$games",
+                        preserveNullAndEmptyArrays: true
+                    }
+                }, {
+                    $lookup: {
+                        from: "results",
+                        localField: "gameNumber.number",
+                        foreignField: "number",
+                        as: "results"
+                    }
+                },
+                // {
+                //     $lookup: {
+                //         from: "results",
+                //         let: {
+                //             gameNumber: "$gameNumber.number",
+                //             gameDate: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }
+                //         },
+                //         pipeline: [
+                //             {
+                //                 $match: {
+                //                     $expr: {
+                //                         $and: [
+                //                             { $eq: ["$number", "$$gameNumber"] },
+                //                             { $eq: ["$formattedDate", "$$gameDate"] }
+                //                         ]
+                //                     }
+                //                 }
+                //             }
+                //         ],
+                //         as: "results"
+                //     }
+                // },
+                {
+                    $project: {
+                        "userId": 1,
+                        "type": 1,
+                        "gameNumber": 1,
+                        "date": 1,
+                        "status": 1,
+                        "createdAt": 1,
+                        "updatedAt": 1,
+                        "games": { name: "$games.name" },
+                        users: { name: "$users.name", _id: "$users._id" },
+                        "results": 1
                     }
                 }
-            }
-        },
-        {
-            $lookup: {
-                from: "users",
-                localField: "userId",
-                foreignField: "_id",
-                as: "users"
-            }
-        },
-        {
-            $unwind: {
-                path: "$users",
-                preserveNullAndEmptyArrays: true
-            }
-        },
+            ]);
 
-        {
-            $lookup: {
-                from: "results",
-                let: { gameNumber: "$gameNumber.number", gameDate: "$formattedDate" },
-                pipeline: [
-                    {
-                        $addFields: {
-                            "formattedDate": {
-                                $dateToString: {
-                                    format: "%Y-%m-%d",
-                                    date: "$date"
-                                }
-                            }
-                        }
-                    },
-                    {
-                        $match: {
-                            $expr: {
-                                $and: [
-                                    { $eq: ["$number", "$$gameNumber"] },
-                                    // { $eq: ["$formattedDate", "$$gameDate"] }
-                                ]
-                            }
-                        }
-                    }
-                ],
-                as: "results"
-            }
-        }, {
-            $lookup: {
-                from: "games",
-                localField: "type",
-                foreignField: "_id",
-                as: "games"
-            }
-        },
-        {
-            $unwind: {
-                path: "$results",
-                preserveNullAndEmptyArrays: true
-            }
-        },
-        {
-            $unwind: {
-                path: "$games",
-                preserveNullAndEmptyArrays: true
-            }
-        },
-        {
-            $project: {
-                "userId": 1,
-                "type": 1,
-                "gameNumber": 1,
-                "date": 1,
-                "status": 1,
-                "createdAt": 1,
-                "updatedAt": 1,
-                "games": { name: "$games.name" },
-                users: { name: "$users.name", _id: "$users._id" },
-                "results": 1
-            }
+            console.log({ list });
+            return res.json({
+                status: true,
+                message: "Your game request list.",
+                data: list
+            });
+        } catch (error) {
+            console.error("Error fetching game requests:", error);
+            return res.status(500).json({
+                status: false,
+                message: "An error occurred while fetching game requests."
+            });
         }
-        ]);
-        console.log({ list });
-        return res.json({
-            status: true,
-            message: "Your game request list.",
-            data: list
-        });
     }
 
 }

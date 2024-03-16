@@ -3,6 +3,7 @@ const GameModel = require('../models/gameModel');
 const GameRequestModel = require('../models/gameRequestModel');
 const Result = require("./../models/resultModel")
 const moment = require('moment');
+const userModel = require('../models/userModel');
 class GameController {
     async index(req, res) {
         const currentDate = new Date(); // Current date
@@ -142,58 +143,114 @@ class GameController {
         })
     }
 
+    // async gameResult(req, res) {
+    //     const { startTime, endTime, number, resultTime, gameId } = req.body;
+    //     const result = await Result.create({ startTime, endTime, number, resultTime, gameId })
+    //     console.table([gameId, number])
+
+    //     let todayRequest = await GameRequestModel.aggregate([
+    //         {
+    //             $match: {
+    //                 type: gameId,
+    //                 // gameNumber: number
+    //             }
+    //         }
+
+
+    //         // {
+    //         //     $addFields: {
+    //         //         "today": {
+    //         //             $dateToString: {
+    //         //                 format: "%Y-%m-%d",
+    //         //                 date: "$date"
+    //         //             }
+    //         //         }
+    //         //     }
+    //         // }, {
+    //         //     $match: { today: { $eq: moment().format("Y-MM-DD").toString() } }
+    //         // },
+    //     ]);
+
+    //     console.log("{ todayRequest }====", { todayRequest });
+    //     return res.json({
+    //         data: result,
+    //         message: "Game result updated successfully===="
+    //     });
+    // }
+
+    // async gameResult(req, res) {
+    //     const { startTime, endTime, number, resultTime, gameId } = req.body;
+    //     const result = await Result.create({ startTime, endTime, number, resultTime, gameId });
+    //     console.table([gameId, number]);
+
+    //     let gameRequests = await GameRequestModel.aggregate([
+    //         {
+    //             $match: {
+    //                 gameId: gameId,
+    //                 gameNumber: number
+    //             }
+    //         },
+    //         {
+    //             $project: {
+    //                 _id: 0,
+    //                 gameId: 1,
+    //                 gameNumber: 1,
+    //                 startTime: 1,
+    //                 endTime: 1
+    //             }
+    //         }
+    //     ]);
+    //     console.log("Game Requests list:", gameRequests);
+
+    //     return res.json({
+    //         data: result,
+    //         gameRequests: gameRequests,
+    //         message: "Game result updated successfully"
+    //     });
+    // }
+
     async gameResult(req, res) {
+        let today = new Date();
+        today.setHours(0, 0, 0, 0);
         const { startTime, endTime, number, resultTime, gameId } = req.body;
-        const result = await Result.create({ startTime, endTime, number, resultTime, gameId })
+        const result = await Result.create({ startTime, endTime, number, resultTime, gameId });
+
+        const gameTime = await GameModel.findOne({ _id: gameId });
+        let startTimeData = moment(gameTime.startTime, 'hh:mm A');
+        let endTimeData = moment(gameTime.endTime, 'hh:mm A');
+
+        if (endTimeData.isBefore(startTimeData)) {
+            endTimeData.add(1, 'day'); // Add 1 day to end time if it's before start time
+        }
+        console.log(startTimeData, endTimeData, gameTime);
+        // let duration = moment.duration(endTimeData.diff(startTimeData));
+        // let hours = duration.asHours();
+        let gameRequests = await GameRequestModel.find({
+            $and: [{
+                date: { $gte: startTimeData, $lte: endTimeData },
+                type: gameId,
+                "gameNumber.number": number
+            }]
+
+        },
+
+        );
+        console.table(gameRequests);
+        if (gameRequests.length > 0) {
+            for (const iterator of gameRequests) {
+
+                let useData = await userModel.findOne({ _id: iterator.userId })
+                await useData.updateOne({
+                    wallet: Number(useData.wallet) + Number(iterator.gameNumber[0].price * 90)
+                })
+            }
+        }
         return res.json({
             data: result,
+            gameRequests: gameRequests,
             message: "Game result updated successfully"
         });
     }
-
-    /** this api not used */
-
-    async todayResult(req, res) {
-        let todayRequest = await GameRequestModel.aggregate([
-            {
-                $addFields: {
-                    "today": {
-                        $dateToString: {
-                            format: "%Y-%m-%d",
-                            date: "$date"
-                        }
-                    }
-                }
-            }, {
-                $match: { today: { $eq: moment().format("Y-MM-DD").toString() } }
-            },
-            {
-                $unwind: "$gameNumber"
-            },
-            {
-                $group: {
-                    "_id": "$gameNumber.number",
-                    count: { $sum: 1 },
-                    totalPrice: { $sum: "$gameNumber.price" },
-                    minPrice: { $min: "$gameNumber.price" },
-                    minCount: { $min: { $sum: 1 } },
-                    data: { $push: "$$ROOT" }
-                }
-            },
-            {
-                $unwind: "$data"
-            },
-            {
-                $sort: { totalPrice: 1 }
-            }
-
-        ]);
-        return res.json({
-            data: todayRequest,
-            message: "Game totle Amount result successfully"
-        });
-    }
-    /** this api not used */
 
     async filterGame(req, res) {
         const { gameId, date } = req.query;
@@ -247,6 +304,85 @@ class GameController {
             message: "Game Filter List successfully",
             status: true
         });
+    }
+
+    async todayrecords(req, res) {
+        let todayRequest = await GameRequestModel.aggregate([
+            {
+                $addFields: {
+                    "today": {
+                        $dateToString: {
+                            format: "%Y-%m-%d",
+                            date: "$date"
+                        }
+                    }
+                }
+            }, {
+                $match: { today: { $eq: moment().format("Y-MM-DD").toString() } }
+            },
+        ]);
+        return res.json({
+            data: todayRequest,
+            message: "Game totle Amount result successfully"
+        });
+    }
+    /**
+     * 
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     * For User update wallet according to result APis
+     */
+    async updateResultWallet(req, res) {
+        const { gameId, date } = req.body;
+        let startDate = new Date(date);
+        const updateWalletData = await Result.findOne({
+            gameId: gameId,
+            date: {
+                $expr: {
+                    $eq: [{ $dateToString: { format: "%Y-%m-%d", date: "$date" } }, startDate]
+                }
+            }
+        });
+        if (updateWalletData && updateWalletData?.updateWallet) {
+            return res.json({
+                status: true,
+                message: "User today wallet already updated"
+            });
+        } else {
+            let gameRequests = await GameRequestModel.find({
+                $and: [{
+                    date: {
+                        $expr: {
+                            $eq: [{ $dateToString: { format: "%Y-%m-%d", date: "$date" } }, startDate]
+                        }
+                    },
+                    type: gameId,
+                    "gameNumber.number": updateWalletData.number
+                }]
+            });
+            if (gameRequests.length > 0) {
+                for (const _user of gameRequests) {
+                    let useData = await userModel.findOne({ _id: _user.userId })
+                    let updateUser = await useData.updateOne({
+                        wallet: Number(useData.wallet) + Number(_user.gameNumber[0].price * 90)
+                    })
+                }
+                await updateWalletData.updateOne({
+                    updateWallet: new Date()
+                });
+                return res.json({
+                    status: true,
+                    message: "User wallet updated successfully"
+                });
+            } else {
+                return res.json({
+                    status: true,
+                    message: "No user found"
+                });
+            }
+
+        }
     }
 
 

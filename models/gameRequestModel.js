@@ -28,4 +28,4 @@ const RequestModel = new mongoose.Schema({
     timestamps: true
 });
 
-module.exports = mongoose.model('GameRequestModel', RequestModel);  
+module.exports = mongoose.model('GameRequest', RequestModel);  

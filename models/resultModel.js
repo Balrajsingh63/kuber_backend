@@ -17,6 +17,9 @@ const resultModel = new mongoose.Schema({
     date: {
         type: Date
     },
+    updateWallet: {
+        type: Date
+    },
     status: {
         type: String,
         enum: ["active", "deactive"],

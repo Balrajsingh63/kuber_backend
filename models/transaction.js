@@ -23,4 +23,4 @@ const TransactionModel = new mongoose.Schema({
     timestamps: true
 });
 
-module.exports = mongoose.model('TransactionModel', TransactionModel);  
+module.exports = mongoose.model('Transaction', TransactionModel);  

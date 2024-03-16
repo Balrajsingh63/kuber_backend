@@ -15,8 +15,14 @@ const Result = require("./models/resultModel");
 const { config } = require('process');
 const db = require("./config/db");
 const { Server } = require("socket.io");
-var app = express();
+const gameModel = require('./models/gameModel');
+const moment = require("moment");
+const GameRequestModel = require("./models/gameRequestModel");
+const userModel = require("./models/userModel");
 
+const cronJob = require("./cronJob/gameResultCron")
+var app = express();
+cronJob.settlement()
 // var https_options = {
 //   key: fs.readFileSync("/etc/nginx/ssl/private.key"),
 //   cert: fs.readFileSync("/etc/nginx/ssl/certificate.crt"),
@@ -72,8 +78,56 @@ io.on("connect", (socket) => {
     socket.join(room);
   });
 
-  socket.on("result", async ({ startTime, endTime, number, resultTime, gameId }) => {
-    const result = await Result.create({ startTime, endTime, number, resultTime, gameId })
+  socket.on("result", async ({ startTime, endTime, date, number, resultTime, gameId }) => {
+    let currentDateTime = new Date(date); // Get the current date and time
+    let game = await gameModel.findOne({
+      _id: gameId
+    });
+    // Find a document where createdAt matches the current date and time, and _id matches gameId
+    let checkResult = await Result.findOne({
+      createdAt: {
+        $gte: new Date(currentDateTime.getFullYear(), currentDateTime.getMonth(), currentDateTime.getDate(), 0, 0, 0),
+        $lt: new Date(currentDateTime.getFullYear(), currentDateTime.getMonth(), currentDateTime.getDate() + 1, 0, 0, 0)
+      },
+      gameId: gameId
+    });
+    if (checkResult) {
+      await checkResult.updateOne({
+        number,
+        resultTime,
+      })
+    } else {
+      const result = await Result.create({ startTime: game.startTime, endTime: game.endTime, date: currentDateTime, number, resultTime: game.resultTime, gameId })
+    }
+    // const gameTime = await gameModel.findOne({ _id: gameId });
+    // setTimeout(async () => {
+    //   let startTimeData = moment(gameTime.startTime, 'hh:mm A');
+    //   let endTimeData = moment(gameTime.endTime, 'hh:mm A');
+
+    //   if (endTimeData.isBefore(startTimeData)) {
+    //     endTimeData.add(1, 'day'); // Add 1 day to end time if it's before start time
+    //   }
+    //   console.log(startTimeData, endTimeData, gameTime);
+    //   // let duration = moment.duration(endTimeData.diff(startTimeData));
+    //   // let hours = duration.asHours();
+    //   let gameRequests = await GameRequestModel.find({
+    //     $and: [{
+    //       date: { $gte: startTimeData, $lte: endTimeData },
+    //       type: gameId,
+    //       "gameNumber.number": number
+    //     }]
+    //   },
+    //   );
+    //   if (gameRequests.length > 0) {
+    //     for (const iterator of gameRequests) {
+    //       let useData = await userModel.findOne({ _id: iterator.userId })
+    //       await useData.updateOne({
+    //         wallet: Number(useData.wallet) + Number(iterator.gameNumber[0].price * 90)
+    //       })
+    //     }
+    //   }
+    // }, 300000)
+
     io.emit("result_reload", { status: true });
 
   })
