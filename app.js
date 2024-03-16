@@ -22,7 +22,7 @@ const userModel = require("./models/userModel");
 
 const cronJob = require("./cronJob/gameResultCron")
 var app = express();
-cronJob.settlement()
+// cronJob.settlement()
 // var https_options = {
 //   key: fs.readFileSync("/etc/nginx/ssl/private.key"),
 //   cert: fs.readFileSync("/etc/nginx/ssl/certificate.crt"),
