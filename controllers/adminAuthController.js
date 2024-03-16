@@ -32,30 +32,6 @@ class AdminAuthController {
         });
 
     }
-
-    // async userRegister(req, res) {
-    //     try {
-    //         const { name, phone, password, email } = req.body;
-    //         await userModel.create({
-    //             name: name,
-    //             // email:email,
-    //             mobile: (phone),
-    //             password: await bcrypt.hashSync(password, saltRounds),
-    //             role: "Customer",
-    //             status: "Deactive"
-    //         })
-    //         res.status(201).json({
-    //             status: true,
-    //             message: "User register successfully."
-    //         })
-    //     } catch (error) {
-    //         console.log(error.message)
-    //         return res.status(500).json({
-    //             message: "Somthing want worng ! try again later"
-    //         })
-    //     }
-
-    // }
 }
 
 module.exports = new AdminAuthController();

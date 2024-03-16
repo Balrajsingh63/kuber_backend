@@ -18,15 +18,5 @@ class UserController {
             status: true
         })
     }
-    // async store(req,res) {
-
-    // }
-    //  async index() {
-
-    // } async index() {
-
-    // } async index() {
-
-    // }
 }
 module.exports = new UserController();
