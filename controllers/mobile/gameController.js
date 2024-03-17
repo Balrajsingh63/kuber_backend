@@ -67,6 +67,9 @@ class GameController {
             let gameStartDateTime = moment(moment(new Date()).format("DD-MM-Y") + " " + iterator.startTime, "DD-MM-Y HH:mm");
             // let gameEndDateTime = moment(moment(new Date()).format("DD-MM-Y") + " " + game.endTime, "DD-MM-Y HH:mm").add(1, 'day');
             let gameEndDateTime = moment(moment(new Date()).format("DD-MM-Y") + " " + iterator.endTime, "DD-MM-Y HH:mm");
+            // if (gameStartDateTime > gameEndDateTime) {
+            //     gameEndDateTime.add(1, "day")
+            // }
             if (!(currentDateTime.isBetween(gameStartDateTime, gameEndDateTime))) {
                 iterator.openingStatus = "Closed";
             } else {
@@ -104,6 +107,11 @@ class GameController {
             console.log('gameStartDateTime **** ', gameStartDateTime)
             console.log('gameEndDateTime **** ', gameEndDateTime)
 
+
+            if (gameStartDateTime > gameEndDateTime) {
+                gameEndDateTime.add(1, day)
+            }
+            //
             if (!(currentDateTime.isBetween(gameStartDateTime, gameEndDateTime))) {
                 return res.json({
                     message: "Game request not available at this time",
@@ -123,10 +131,10 @@ class GameController {
                 })
             }
             var gameReq = await gameRequestModel.create({
+                // date: new Date(newDate),
                 date: new Date(),
                 userId: (req.user._id),
                 gameNumber,
-                date: new Date(),
                 type,
                 status: "active"
             });
@@ -158,7 +166,7 @@ class GameController {
       * @param {*} req
       * @param {*} res
       * @returns
-      **/
+      */
 
     async gameRequest(req, res) {
         try {
@@ -168,8 +176,7 @@ class GameController {
                     $match: {
                         userId: new mongoose.Types.ObjectId(_id)
                     }
-                },
-                {
+                }, {
                     $lookup: {
                         from: "users",
                         localField: "userId",
@@ -196,36 +203,42 @@ class GameController {
                         path: "$games",
                         preserveNullAndEmptyArrays: true
                     }
-                }, {
+                },
+                {
+                    $addFields: {
+                        gameDate: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }
+                    }
+                },
+                {
                     $lookup: {
                         from: "results",
-                        localField: "gameNumber.number",
-                        foreignField: "number",
+                        let: { gameNumber: { $arrayElemAt: ["$gameNumber.number", 0] }, gameDate: "$gameDate" },
+                        pipeline: [
+                            {
+                                $addFields: {
+                                    resultDate: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }
+                                }
+                            },
+                            {
+                                $match: {
+                                    $expr: {
+                                        $and: [
+                                            { $eq: ["$number", "$$gameNumber"] },
+                                            { $eq: ["$resultDate", "$$gameDate"] }
+                                        ]
+                                    }
+                                }
+                            }
+                        ],
                         as: "results"
                     }
                 },
-                // {
-                //     $lookup: {
-                //         from: "results",
-                //         let: {
-                //             gameNumber: "$gameNumber.number",
-                //             gameDate: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }
-                //         },
-                //         pipeline: [
-                //             {
-                //                 $match: {
-                //                     $expr: {
-                //                         $and: [
-                //                             { $eq: ["$number", "$$gameNumber"] },
-                //                             { $eq: ["$formattedDate", "$$gameDate"] }
-                //                         ]
-                //                     }
-                //                 }
-                //             }
-                //         ],
-                //         as: "results"
-                //     }
-                // },
+                {
+                    $unwind: {
+                        path: "$results",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
                 {
                     $project: {
                         "userId": 1,
@@ -241,6 +254,7 @@ class GameController {
                     }
                 }
             ]);
+
 
             console.log({ list });
             return res.json({

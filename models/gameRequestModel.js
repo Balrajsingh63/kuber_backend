@@ -6,7 +6,7 @@ const RequestModel = new mongoose.Schema({
     },
     type: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "game"
+        ref: "games"
     },
     gameNumber: [{
         number: {

@@ -7,7 +7,7 @@ const paymentModel = new mongoose.Schema({
     },
     gameRequestId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "gamerequestmodels"
+        ref: "gamerequests"
     },
     transactionId: {
         type: String

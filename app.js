@@ -79,6 +79,7 @@ io.on("connect", (socket) => {
   });
 
   socket.on("result", async ({ startTime, endTime, date, number, resultTime, gameId }) => {
+    console.log("date", date)
     let currentDateTime = new Date(date); // Get the current date and time
     let game = await gameModel.findOne({
       _id: gameId
@@ -94,6 +95,7 @@ io.on("connect", (socket) => {
     if (checkResult) {
       await checkResult.updateOne({
         number,
+        date: date,
         resultTime,
       })
     } else {

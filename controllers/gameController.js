@@ -5,6 +5,7 @@ const Result = require("./../models/resultModel")
 const moment = require('moment');
 const userModel = require('../models/userModel');
 class GameController {
+
     async index(req, res) {
         const currentDate = new Date(); // Current date
         const currentDateString = currentDate.toISOString().split('T')[0]; // Get the current date string
@@ -273,9 +274,8 @@ class GameController {
         const updateWalletData = await Result.findOne({
             gameId: gameId,
             date: {
-                $expr: {
-                    $eq: [{ $dateToString: { format: "%Y-%m-%d", date: "$date" } }, startDate]
-                }
+                $gte: new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()),
+                $lt: new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + 1)
             }
         });
         if (updateWalletData && updateWalletData?.updateWallet) {
@@ -287,9 +287,8 @@ class GameController {
             let gameRequests = await GameRequestModel.find({
                 $and: [{
                     date: {
-                        $expr: {
-                            $eq: [{ $dateToString: { format: "%Y-%m-%d", date: "$date" } }, startDate]
-                        }
+                        $gte: new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()),
+                        $lt: new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + 1)
                     },
                     type: gameId,
                     "gameNumber.number": updateWalletData.number
