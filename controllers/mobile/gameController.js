@@ -212,7 +212,7 @@ class GameController {
                 {
                     $lookup: {
                         from: "results",
-                        let: { gameNumber: { $arrayElemAt: ["$gameNumber.number", 0] }, gameDate: "$gameDate" },
+                        let: { gameNumber: "$gameNumber.number", gameDate: "$gameDate", type: "$type" },
                         pipeline: [
                             {
                                 $addFields: {
@@ -223,8 +223,9 @@ class GameController {
                                 $match: {
                                     $expr: {
                                         $and: [
-                                            { $eq: ["$number", "$$gameNumber"] },
-                                            { $eq: ["$resultDate", "$$gameDate"] }
+                                            { $in: ["$number", "$$gameNumber"] },
+                                            { $eq: ["$resultDate", "$$gameDate"] },
+                                            { $eq: ["$gameId", "$$type"] }
                                         ]
                                     }
                                 }

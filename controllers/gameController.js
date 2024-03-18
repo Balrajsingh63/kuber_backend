@@ -195,7 +195,7 @@ class GameController {
             },
             {
                 $lookup: {
-                    from: "gamerequestmodels",
+                    from: "gamerequests",
                     let: { gameId: "$_id" },
                     pipeline: [
                         {
@@ -240,6 +240,11 @@ class GameController {
             status: true
         });
     }
+
+
+
+
+
 
     async todayrecords(req, res) {
         let todayRequest = await GameRequestModel.aggregate([
