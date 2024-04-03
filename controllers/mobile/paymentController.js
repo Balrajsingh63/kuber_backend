@@ -85,14 +85,14 @@ class PaymentController {
                 date: new Date(),
                 status: "pending"
             });
-            const payment = await Payment.create({
-                userId: _id,
-                date: new Date(),
-                transactionId: request._id,
-                paymentStatus: "pending",
-                amount: amount,
-                // gameRequestId: gameRequestId != "" ? gameRequestId : null
-            });
+            // const payment = await Payment.create({
+            //     userId: _id,
+            //     date: new Date(),
+            //     transactionId: request._id,
+            //     paymentStatus: "pending",
+            //     amount: amount,
+            //     // gameRequestId: gameRequestId != "" ? gameRequestId : null
+            // });
             let transactions = await Transaction.create({
                 userId: _id,
                 type: 'debit',
