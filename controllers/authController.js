@@ -38,6 +38,13 @@ class AuthController {
     async userRegister(req, res) {
         try {
             const { name, phone, password, email } = req.body;
+            let userCheck = await userModel.findOne({ mobile });
+            if (userCheck) {
+                return res.json({
+                    status: false,
+                    message: "User already exist on this number"
+                })
+            }
             await userModel.create({
                 name: name,
                 // email: email,

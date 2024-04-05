@@ -1,5 +1,6 @@
 const paymentModel = require("../models/paymentModel");
 const WithdrawalMoney = require("../models/moneyRequestModel");
+const userModel = require("../models/userModel");
 
 class PaymentController {
     async list(req, res) {
@@ -31,7 +32,6 @@ class PaymentController {
             message: "Payment List"
         });
     }
-
     async approvedWithdrawalRequest(req, res) {
         const { requestId, status } = req.body;
         const request = await WithdrawalMoney.findOne({
@@ -49,6 +49,29 @@ class PaymentController {
             status: true,
             data: list
         })
+    }
+    async addPaymentUserWallet(req, res) {
+        try {
+            const { mobile, price } = req.body;
+            const findUser = await userModel.findOne({ mobile });
+            if (!findUser) {
+                return res.json({
+                    status: false,
+                    message: "User not found."
+                })
+            }
+            const user = await userModel.findOneAndUpdate({ mobile }, { $inc: { wallet: price } });
+            return res.json({
+                status: true,
+                message: "Wallet updated successfullly."
+            })
+        } catch (error) {
+            return res.json({
+                status: false,
+                message: error.message
+            })
+        }
+
     }
 }
 

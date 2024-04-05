@@ -13,6 +13,14 @@ class UserController {
     }
     async userRegister(req, res) {
         let { name, email, mobile, age, password } = req.body;
+
+        let checkUser = await userModel.findOne({ mobile });
+        if (checkUser) {
+            return res.json({
+                status: false,
+                message: "User already exist on this number"
+            })
+        }
         let hasPassword = await bcrypt.hash(password, saltRounds);
         let user = await userModel.create({
             name: name,
