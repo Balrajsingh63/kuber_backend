@@ -38,7 +38,7 @@ class AuthController {
     async userRegister(req, res) {
         try {
             const { name, phone, password, email } = req.body;
-            let userCheck = await userModel.findOne({ mobile });
+            let userCheck = await userModel.findOne({ mobile: phone });
             if (userCheck) {
                 return res.json({
                     status: false,
