@@ -1,37 +1,53 @@
-const mongoose = require('mongoose');
+/** @format */
 
-const UserModel = new mongoose.Schema({
-    name: {
-        type: String
-    },
-    email: {
-        type: String,
-    },
-    password: {
-        type: String,
-    },
-    mobile: {
-        type: String
-    },
-    age: {
-        type: String
-    },
-    wallet: {
-        type: Number,
-        default: 0
-    },
-    role: {
-        type: String,
-        enum: ["Admin", "SubAdmin", "Customer"],
-        default: "Customer"
-    },
-    status: {
-        type: String,
-        enum: ["Active", "Deactivate"],
-        default: "Active"
-    }
-}, {
-    timestamps: true
-});
+const mongoose = require("mongoose");
 
-module.exports = mongoose.model('User', UserModel);
+const UserModel = new mongoose.Schema(
+	{
+		name: {
+			type: String,
+		},
+		email: {
+			type: String,
+		},
+		password: {
+			type: String,
+		},
+		reffrenceId: {
+			type: String,
+		},
+		reference: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "users",
+		},
+		mobile: {
+			type: String,
+		},
+		age: {
+			type: String,
+		},
+		wallet: {
+			type: Number,
+			default: 0,
+		},
+		role: {
+			type: String,
+			enum: ["SuperAdmin", "Admin", "SubAdmin", "Customer"],
+			default: "Customer",
+		},
+		status: {
+			type: String,
+			enum: ["Active", "Deactivate"],
+			default: "Active",
+		},
+		isBlock: {
+			type: Boolean,
+			default: false,
+		},
+	},
+	{
+		timestamps: true,
+	},
+);
+
+module.exports = mongoose.model("User", UserModel);

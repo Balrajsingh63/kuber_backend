@@ -4,6 +4,7 @@ const userModel = require("../models/userModel");
 const msg = require("../uility/constant");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { createReference } = require("../uility/helpers");
 const saltRounds = 10;
 
 class AdminAuthController {
@@ -17,10 +18,12 @@ class AdminAuthController {
 					message: "Admin already exist on this email",
 				});
 			}
+			let reffrenceId = createReference();
 			await userModel.create({
 				email: email,
 				password: await bcrypt.hashSync(password, saltRounds),
 				role: "Admin",
+				reffrenceId: reffrenceId,
 			});
 			res.status(201).json({
 				status: true,
@@ -36,7 +39,9 @@ class AdminAuthController {
 
 	async login(req, res) {
 		let { email, password } = req.body;
-		let user = await userModel.findOne({ email: email, role: "Admin" }).lean();
+		let user = await userModel
+			.findOne({ email: email, role: "Admin", isBlock: false })
+			.lean();
 		if (!user) {
 			return res.status(200).json({
 				status: false,
