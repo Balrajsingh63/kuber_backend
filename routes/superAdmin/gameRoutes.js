@@ -10,4 +10,5 @@ router.get("/:id", GameController.showGame);
 router.put("/:id", GameController.updateGame);
 router.delete("/delete/:id", GameController.deleteGame);
 router.get("/request-list", GameController.gameRequestList);
+router.get("/change-status/:gameId", GameController.gameStatus);
 module.exports = router;
